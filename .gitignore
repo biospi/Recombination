@@ -1,0 +1,4 @@
+.venv
+output
+wgs-mapping.tar.gz
+__pycache__
