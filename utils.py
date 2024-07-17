@@ -52,13 +52,17 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             # Find all occurrences of consecutive 'N's
                             consecutive_Ns = re.finditer(r'N+', str(record.seq))
                             # Store each occurrence and its length
-                            N_counts = [(match.group(), len(match.group())) for match in consecutive_Ns]
-                            # Example: Print the results
-                            for N_seq, length in N_counts:
-                                print(f"Sequence: {N_seq}, Length: {length}")
+                            N_counts = [len(match.group()) for match in consecutive_Ns]
+                            print(f"N_counts={N_counts}")
 
-                            if record.id in exlude:
-                                print(f"Excluding sequence {record.id} with length {seq_len}")
+                            valid = True
+                            for v in N_counts:
+                                if v > 1000:
+                                    valid = False
+                                    break
+
+                            if record.id in exlude or not valid:
+                                print(f"Excluding sequence {record.id} with length {seq_len} N_counts={N_counts}")
                                 continue
 
                             if seq_len == expected_length:
