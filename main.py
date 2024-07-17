@@ -1,5 +1,6 @@
 from pathlib import Path
 import typer
+from typing import List, Optional
 import warnings
 
 from utils import count_isolates_in_tar_gz, filter_isolates_in_tar_gz, run_cmd
@@ -11,7 +12,8 @@ def main(
     dataset_filepath: Path = typer.Option(
         ..., exists=True, file_okay=True, dir_okay=False, resolve_path=True
     ),
-    output_dir: str = "output"
+    output_dir: str = "output",
+    exlude: List[str] = ["SRR5193868"]
 ):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -25,7 +27,7 @@ def main(
         print(f"Deleting {cleaned_tar_gz_filepath}...")
         cleaned_tar_gz_filepath.unlink()
 
-    filter_isolates_in_tar_gz(dataset_filepath.as_posix(), cleaned_tar_gz_filepath.as_posix())
+    filter_isolates_in_tar_gz(dataset_filepath.as_posix(), cleaned_tar_gz_filepath.as_posix(), exlude)
     
     iso_count = count_isolates_in_tar_gz(cleaned_tar_gz_filepath.as_posix())
     print(f"Found {iso_count} isolates in {cleaned_tar_gz_filepath}.")

@@ -11,8 +11,9 @@ from Bio import SeqIO
 from pathlib import Path
 
 
-def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
+def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
+    print(f"exlude={exlude}")
     sequence_lengths = []
     logs = []
     
@@ -41,11 +42,12 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             seq_len = len(record.seq)
-                            print(f"seq_len={seq_len} expected_length={expected_length} record.id={record.id}")
-                            print(record)
-
                             log = f"{seq_len},{expected_length},{record.id},{record}"
                             logs.append(log)
+
+                            if record.id in exlude:
+                                print(f"Excluding sequence {record.id} with length {seq_len}")
+                                continue
 
                             if seq_len == expected_length:
                                 sequences.append(record)
