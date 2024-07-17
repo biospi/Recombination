@@ -6,7 +6,7 @@ from Bio import SeqIO
 import pandas as pd
 import tarfile
 import gzip
-from io import TextIOWrapper, BytesIO
+from io import TextIOWrapper, BytesIO, StringIO
 from Bio import SeqIO
 from pathlib import Path
 
@@ -29,17 +29,21 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
 
                         if sequences:
                             # Create a temporary file to write filtered sequences
-                            tmp_file = BytesIO()
+                            tmp_file = StringIO()
                             SeqIO.write(sequences, tmp_file, "fasta")
                             tmp_file.seek(0)
 
+                            # Convert StringIO content to bytes
+                            byte_file = BytesIO(tmp_file.getvalue().encode('utf-8'))
+                            byte_file.seek(0)
+
                             # Create a new tarinfo object for the filtered sequences file
                             tarinfo = tarfile.TarInfo(name=member.name)
-                            tarinfo.size = tmp_file.tell()  # Use tell() to get the size
-                            tmp_file.seek(0)  # Reset the pointer to the beginning
+                            tarinfo.size = len(byte_file.getvalue())
+                            byte_file.seek(0)  # Reset the pointer to the beginning
 
                             # Add the filtered sequences file to the new tar.gz archive
-                            cleaned_tar.addfile(tarinfo, fileobj=tmp_file)
+                            cleaned_tar.addfile(tarinfo, fileobj=byte_file)
 
     # Create a DataFrame from the lengths list
     df = pd.DataFrame(length_list, columns=['Length'])
