@@ -14,6 +14,7 @@ from pathlib import Path
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
     sequence_lengths = []
+    logs = []
     
     # First, collect all sequence lengths
     with tarfile.open(tar_gz_filepath, "r:gz") as tar:
@@ -42,6 +43,10 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
                             seq_len = len(record.seq)
                             print(f"seq_len={seq_len} expected_length={expected_length} record.id={record.id}")
                             print(record)
+
+                            log = f"{seq_len},{expected_length},{record.id},{record}"
+                            logs.append(log)
+
                             if seq_len == expected_length:
                                 sequences.append(record)
                             else:
@@ -71,6 +76,12 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
     lengths_csv_filepath = Path("sequence_lengths.csv")
     length_counts.to_csv(lengths_csv_filepath, index=False)
     print(f"Sequence lengths saved to {lengths_csv_filepath}")
+
+    # Save logs to a CSV file
+    log_df = pd.DataFrame([log.split(",") for log in logs], columns=["seq_len", "expected_length", "record_id", "record"])
+    log_csv_filepath = Path("log.csv")
+    log_df.to_csv(log_csv_filepath, index=False)
+    print(f"Logs saved to {log_csv_filepath}")
 
 
 def count_isolates_in_tar_gz(tar_gz_filepath):
