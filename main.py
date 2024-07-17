@@ -13,7 +13,7 @@ def main(
         ..., exists=True, file_okay=True, dir_okay=False, resolve_path=True
     ),
     output_dir: str = "output",
-    exlude: List[str] = ["SRR5193868"]
+    exlude: List[str] = ["SRR5193868", "SRR5193995"]
 ):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -9,6 +9,7 @@ import gzip
 from io import TextIOWrapper, BytesIO, StringIO
 from Bio import SeqIO
 from pathlib import Path
+from collections import Counter
 
 
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
@@ -42,7 +43,8 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             seq_len = len(record.seq)
-                            log = f"{seq_len},{expected_length},{record.id},{record}"
+                            char_count = Counter(record.seq)  # Count each character in the sequence
+                            log = f"{seq_len},{expected_length},{record.id},{record},{dict(char_count)}"
                             logs.append(log)
 
                             if record.id in exlude:
@@ -80,7 +82,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Sequence lengths saved to {lengths_csv_filepath}")
 
     # Save logs to a CSV file
-    log_df = pd.DataFrame([log.split(",") for log in logs], columns=["seq_len", "expected_length", "record_id", "record"])
+    log_df = pd.DataFrame([log.split(",") for log in logs], columns=["seq_len", "expected_length", "record_id", "record", "count"])
     log_csv_filepath = Path("log.csv")
     log_df.to_csv(log_csv_filepath, index=False)
     print(f"Logs saved to {log_csv_filepath}")
