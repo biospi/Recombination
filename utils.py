@@ -50,7 +50,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             logs.append(log)
 
                             # Find all occurrences of consecutive 'N's
-                            consecutive_Ns = re.finditer(r'N+', record.seq)
+                            consecutive_Ns = re.finditer(r'N+', str(record.seq))
                             # Store each occurrence and its length
                             N_counts = [(match.group(), len(match.group())) for match in consecutive_Ns]
                             # Example: Print the results
