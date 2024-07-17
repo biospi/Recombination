@@ -18,8 +18,8 @@ def main(
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"dataset_filepath={dataset_filepath}")
     print("loading...")
-    # iso_count = count_isolates_in_tar_gz(dataset_filepath.as_posix())
-    # print(f"Found {iso_count} isolates in {dataset_filepath}.")
+    iso_count = count_isolates_in_tar_gz(dataset_filepath.as_posix())
+    print(f"Found {iso_count} isolates in {dataset_filepath}.")
 
     cleaned_tar_gz_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.tar.gz"
 

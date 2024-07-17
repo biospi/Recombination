@@ -23,8 +23,8 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             length_list.append(len(record.seq))
-                            if len(record.seq) <= min_length:
-                                continue    
+                            # if len(record.seq) <= min_length:
+                            #     continue    
                             sequences.append(record)
 
                         if sequences:
