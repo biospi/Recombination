@@ -11,9 +11,8 @@ from Bio import SeqIO
 from pathlib import Path
 
 
-def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_length):
+def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
-    length_list = []
     sequence_lengths = []
     
     # First, collect all sequence lengths
@@ -28,12 +27,6 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
     
     # Determine the expected length as the most common sequence length
     df = pd.DataFrame(sequence_lengths, columns=['Length'])
-    slength_counts = df['Length'].value_counts().reset_index()
-    slength_counts.columns = ['Length', 'Count']
-    slengths_csv_filepath = Path("ssequence_lengths.csv")
-    slength_counts.to_csv(slengths_csv_filepath, index=False)
-    print(f"Sequence lengths saved to {slengths_csv_filepath}")
-
     expected_length = df['Length'].mode()[0]
     print(f"Expected sequence length: {expected_length}")
 
@@ -47,10 +40,10 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             seq_len = len(record.seq)
-                            length_list.append(seq_len)
-                            if seq_len != expected_length or seq_len <= min_length:
-                                continue    
-                            sequences.append(record)
+                            if seq_len == expected_length:
+                                sequences.append(record)
+                            else:
+                                print(f"Excluding sequence {record.id} with length {seq_len}")
 
                         if sequences:
                             # Create a temporary file to write filtered sequences
