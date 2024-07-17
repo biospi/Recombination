@@ -40,6 +40,8 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath):
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             seq_len = len(record.seq)
+                            print(f"seq_len={seq_len} expected_length={expected_length} record.id={record.id}")
+                            print(record)
                             if seq_len == expected_length:
                                 sequences.append(record)
                             else:
