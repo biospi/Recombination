@@ -44,7 +44,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             seq_len = len(record.seq)
                             char_count = Counter(record.seq)  # Count each character in the sequence
-                            log = f"{seq_len},{expected_length},{record.id},{record},{str(dict(char_count)).replace(',', " ")}"
+                            log = f"{seq_len},{expected_length},{record.id},{record.seq},{str(dict(char_count)).replace(',', " ")}"
                             print(log)
                             logs.append(log)
 
