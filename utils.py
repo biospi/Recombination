@@ -12,15 +12,14 @@ from pathlib import Path
 
 
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_length):
-    length_list =[]
+    print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
+    length_list = []
     with tarfile.open(tar_gz_filepath, "r:gz") as tar, tarfile.open(cleaned_tar_gz_filepath, "w:gz") as cleaned_tar:
         for member in tar.getmembers():
             if member.isfile() and member.name.endswith('.fasta'):
                 file = tar.extractfile(member)
                 if file is not None:
                     with TextIOWrapper(file, encoding='utf-8') as fasta_file:
-                        #sequences = [record for record in SeqIO.parse(fasta_file, "fasta") if len(record.seq) >= min_length]
-
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             length_list.append(len(record.seq))
@@ -33,9 +32,12 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
                             tmp_file = BytesIO()
                             SeqIO.write(sequences, tmp_file, "fasta")
                             tmp_file.seek(0)
+
                             # Create a new tarinfo object for the filtered sequences file
                             tarinfo = tarfile.TarInfo(name=member.name)
-                            tarinfo.size = len(tmp_file.getvalue())
+                            tarinfo.size = tmp_file.tell()  # Use tell() to get the size
+                            tmp_file.seek(0)  # Reset the pointer to the beginning
+
                             # Add the filtered sequences file to the new tar.gz archive
                             cleaned_tar.addfile(tarinfo, fileobj=tmp_file)
 
@@ -45,6 +47,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
     length_counts.columns = ['Length', 'Count']
     lengths_csv_filepath = Path("sequence_lengths.csv")
     length_counts.to_csv(lengths_csv_filepath, index=False)
+    print(f"Sequence lengths saved to {lengths_csv_filepath}")
 
 
 def count_isolates_in_tar_gz(tar_gz_filepath):
