@@ -14,6 +14,30 @@ from pathlib import Path
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_length):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
     length_list = []
+    sequence_lengths = []
+    
+    # First, collect all sequence lengths
+    with tarfile.open(tar_gz_filepath, "r:gz") as tar:
+        for member in tar.getmembers():
+            if member.isfile() and member.name.endswith('.fasta'):
+                file = tar.extractfile(member)
+                if file is not None:
+                    with TextIOWrapper(file, encoding='utf-8') as fasta_file:
+                        for record in SeqIO.parse(fasta_file, "fasta"):
+                            sequence_lengths.append(len(record.seq))
+    
+    # Determine the expected length as the most common sequence length
+    df = pd.DataFrame(sequence_lengths, columns=['Length'])
+    slength_counts = df['Length'].value_counts().reset_index()
+    slength_counts.columns = ['Length', 'Count']
+    slengths_csv_filepath = Path("ssequence_lengths.csv")
+    slength_counts.to_csv(slengths_csv_filepath, index=False)
+    print(f"Sequence lengths saved to {slengths_csv_filepath}")
+
+    expected_length = df['Length'].mode()[0]
+    print(f"Expected sequence length: {expected_length}")
+
+    # Now filter sequences based on the expected length and minimum length
     with tarfile.open(tar_gz_filepath, "r:gz") as tar, tarfile.open(cleaned_tar_gz_filepath, "w:gz") as cleaned_tar:
         for member in tar.getmembers():
             if member.isfile() and member.name.endswith('.fasta'):
@@ -22,9 +46,10 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
                     with TextIOWrapper(file, encoding='utf-8') as fasta_file:
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
-                            length_list.append(len(record.seq))
-                            # if len(record.seq) <= min_length:
-                            #     continue    
+                            seq_len = len(record.seq)
+                            length_list.append(seq_len)
+                            if seq_len != expected_length or seq_len <= min_length:
+                                continue    
                             sequences.append(record)
 
                         if sequences:
@@ -46,7 +71,6 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, min_leng
                             cleaned_tar.addfile(tarinfo, fileobj=byte_file)
 
     # Create a DataFrame from the lengths list
-    df = pd.DataFrame(length_list, columns=['Length'])
     length_counts = df['Length'].value_counts().reset_index()
     length_counts.columns = ['Length', 'Count']
     lengths_csv_filepath = Path("sequence_lengths.csv")
