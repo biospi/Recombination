@@ -16,7 +16,7 @@ import numpy as np
 
 def get_consec(char,record, thresh=1000):
     # Find all occurrences of consecutive char
-    consecutive_Ns = re.finditer(f"r'{char}+'", str(record.seq))
+    consecutive_Ns = re.finditer(f'{char}+', str(record.seq))
     # Store each occurrence and its length
     counts = np.array([len(match.group()) for match in consecutive_Ns])
     counts = counts[counts > thresh]
