@@ -14,6 +14,15 @@ import re
 import numpy as np
 
 
+def get_consec(char,record, thresh=1000):
+    # Find all occurrences of consecutive char
+    consecutive_Ns = re.finditer(f"r'{char}+'", str(record.seq))
+    # Store each occurrence and its length
+    counts = np.array([len(match.group()) for match in consecutive_Ns])
+    counts = counts[counts > thresh]
+    return counts
+    
+
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
     print(f"exlude={exlude}")
@@ -50,14 +59,13 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             #print(log)
                             logs.append(log)
 
-                            # Find all occurrences of consecutive 'N's
-                            consecutive_Ns = re.finditer(r'N+', str(record.seq))
-                            # Store each occurrence and its length
-                            N_counts = np.array([len(match.group()) for match in consecutive_Ns])
-                            N_counts = N_counts[N_counts > 1000]
+                            A_counts = get_consec('A', record)
+                            G_counts = get_consec('G', record)
+                            T_counts = get_consec('T', record)
+                            N_counts = get_consec('N', record)
 
-                            if record.id in exlude or len(N_counts) > 0:
-                                print(f"Excluding sequence {record.id} with length {seq_len} N_counts={N_counts}")
+                            if record.id in exlude or len(A_counts) > 0 or len(G_counts) > 0 or len(T_counts) > 0 or len(N_counts) > 0:
+                                print(f"Excluding sequence {record.id} with length {seq_len} A_counts={A_counts}, G_counts={G_counts}, T_counts={T_counts}, N_counts={N_counts}")
                                 continue
 
                             if seq_len == expected_length:
