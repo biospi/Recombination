@@ -13,7 +13,6 @@ from collections import Counter
 import re
 import numpy as np
 import gzip
-from tqdm import tqdm
 
 
 def get_header(file_path, thresh=10):
@@ -83,7 +82,8 @@ def get_consec(char,record, thresh=1000):
 
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
-    #print(f"exlude={exlude}")
+    filter = [str(x).strip().lower().replace('"', '').replace("'", '') for x in exlude]
+    print(f"filter={filter}")
     sequence_lengths = []
     logs = []
     
@@ -110,11 +110,15 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                 if file is not None:
                     with TextIOWrapper(file, encoding='utf-8') as fasta_file:
                         sequences = []
-                        for record in tqdm(SeqIO.parse(fasta_file, "fasta")):
+                        cpt = 0
+                        for record in SeqIO.parse(fasta_file, "fasta"):
                             #print(record.id)
                             # if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
                             #     continue
-                            if str(record.id).strip().lower() not in [str(x).strip().lower for x in exlude]:
+                            r = str(record.id).strip().lower().replace('"', '').replace("'", '')
+                            if cpt < 10:
+                                print(r)
+                            if r in filter:
                                 #print(f"Excluding sequence {record.id}")
                                 continue
 
@@ -124,6 +128,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             # print(log)
                             logs.append(log)
                             sequences.append(record)
+                            cpt += 1
 
                             # A_counts = get_consec('A', record)
                             # G_counts = get_consec('G', record)
