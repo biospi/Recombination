@@ -40,8 +40,9 @@ def get_header(file_path):
     lines[0] = cleaned_header
         
     print(f"number of lines in header: {len(lines)}")
-    for l in lines:
-        print(len(l), l)
+    
+    print(np.unique([len(x) for x in lines]))
+    
     df = pd.DataFrame(lines, columns=lines[0])
     df.to_csv(output_file_path, index=False)
     print(output_file_path)
