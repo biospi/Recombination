@@ -31,26 +31,26 @@ def get_header(file_path):
             #print(line)
             if 'na' in line.lower():
                 continue
+            if '(' in line or ')' in line:
+                continue
             lines.append(line)
     
 
     #TODO fix header parsing not generalisable!
     cleaned_header = lines[0].replace('\x00', '')
-    cleaned_header = cleaned_header.replace("%", '')
+    cleaned_header = cleaned_header.replace('%', '')
     cleaned_header = f"sample_id{cleaned_header.split('sample_id')[-1]}"
-    print(cleaned_header)
+    print(f"cleaned_header: {cleaned_header}")
     lines[0] = cleaned_header
         
     print(f"number of lines in header: {len(lines)}")
-    cleaned_list = []
     with open(output_file_path.as_posix(), 'w') as file:
         for line in lines:
-            if '(' in line or ')' in line:
-                cleaned_list.append(line)
-                continue
             file.write(line + '\n')
 
-    df = pd.DataFrame(cleaned_list, columns=cleaned_header)
+    cols = cleaned_header.split(',')
+    print(f"cols: {cols}")
+    df = pd.DataFrame(lines, columns=cols)
     print(df)
     df.to_csv("header.csv", index=False)
     print(output_file_path)
