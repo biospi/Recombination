@@ -44,8 +44,9 @@ def get_header(file_path):
     value_counts = pd.value_counts([len(x.split(',')) for x in lines])
     print(value_counts)
     most_frequent_value = value_counts.idxmax()
-    
-    df = pd.DataFrame([l for l in lines if len(l.split(',')) == most_frequent_value], columns=lines[0])
+    valid_lines = [l for l in lines if len(l.split(',')) == most_frequent_value and '/' not in l]
+    print(valid_lines)
+    df = pd.DataFrame(valid_lines, columns=lines[0])
     df.to_csv(output_file_path, index=False)
     print(output_file_path)
 
