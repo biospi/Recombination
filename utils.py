@@ -15,6 +15,7 @@ import numpy as np
 import gzip
 
 
+
 def get_header(file_path, thresh=10):
     output_file_path = Path("header.txt")
     if output_file_path.exists():
@@ -64,6 +65,9 @@ def get_header(file_path, thresh=10):
     mask = (values > thresh).all(axis=1)
     result = df_.loc[mask, 'sample_id']
     id_to_exluce = result.values.tolist()
+    df_id = pd.DataFrame([[x] for x in id_to_exluce])
+    print(df_id)
+    df_id.to_csv("id_to_exclude.csv", index=False)
     print(f"n id_to_exluce:{len(id_to_exluce)}")
     return id_to_exluce
 
@@ -110,13 +114,16 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             #print(record.id)
                             # if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
                             #     continue
-
+                            if str(record.id).strip().lower() in [str(x).strip().lower for x in exlude]:
+                                print(f"Excluding sequence {record.id} with length {seq_len}")
+                                continue
 
                             seq_len = len(record.seq)
                             char_count = Counter(record.seq)  # Count each character in the sequence
                             log = f"{seq_len},{expected_length},{record.id},{record},{str(dict(char_count)).replace(',', ' ')}"
-                            print(log)
+                            # print(log)
                             logs.append(log)
+                            sequences.append(record)
 
                             # A_counts = get_consec('A', record)
                             # G_counts = get_consec('G', record)
@@ -131,12 +138,6 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             #     sequences.append(record)
                             # else:
                             #     print(f"Excluding sequence {record.id} with length {seq_len}")
-
-                            if record.id in exlude:
-                                print(f"Excluding sequence {record.id} with length {seq_len}")
-                                continue
-
-                            sequences.append(record)
 
 
                         if len(sequences) > 0:
@@ -156,13 +157,6 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
 
                             # Add the filtered sequences file to the new tar.gz archive
                             cleaned_tar.addfile(tarinfo, fileobj=byte_file)
-
-    # Create a DataFrame from the lengths list
-    length_counts = df['Length'].value_counts().reset_index()
-    length_counts.columns = ['Length', 'Count']
-    lengths_csv_filepath = Path("sequence_lengths.csv")
-    length_counts.to_csv(lengths_csv_filepath, index=False)
-    print(f"Sequence lengths saved to {lengths_csv_filepath}")
 
     # Save logs to a CSV file
     log_df = pd.DataFrame([log.split(",") for log in logs], columns=["seq_len", "expected_length", "record_id", "record", "count"])
