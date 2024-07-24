@@ -42,9 +42,17 @@ def get_header(file_path):
     lines[0] = cleaned_header
         
     print(f"number of lines in header: {len(lines)}")
+    cleaned_list = []
     with open(output_file_path.as_posix(), 'w') as file:
         for line in lines:
+            if '(' in line or ')' in line:
+                cleaned_list.append(line)
+                continue
             file.write(line + '\n')
+
+    df = pd.DataFrame(cleaned_list, columns=cleaned_header)
+    print(df)
+    df.to_csv("header.csv", index=False)
     print(output_file_path)
 
 
