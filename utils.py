@@ -33,6 +33,8 @@ def get_header(file_path):
                 continue
             if '(' in line or ')' in line:
                 continue
+            if len(line) < 1:
+                continue
             lines.append(line)
     
 
@@ -50,7 +52,7 @@ def get_header(file_path):
 
     cols = cleaned_header.split(',')
     print(f"cols: {cols}")
-    df = pd.DataFrame(lines, columns=cols)
+    df = pd.DataFrame([x.split(',') for x in lines], columns=cols)
     print(df)
     df.to_csv("header.csv", index=False)
     print(output_file_path)
