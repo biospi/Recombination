@@ -16,7 +16,7 @@ import gzip
 
 
 def get_header(file_path):
-    output_file_path = Path("header.csv")
+    output_file_path = Path("header.txt")
     if output_file_path.exists():
         output_file_path.unlink()
 
@@ -25,11 +25,11 @@ def get_header(file_path):
             #print(f"Line {i + 1} length: {len(line.strip())}")
             if len(line.strip()) > 1500:
                 break
-            line = line.replace(' ',',').strip()
+            line = line.replace('\t',',').strip()
             print(line)
             output_file.write(line + '\n')
     print(output_file_path.as_posix())
-    print(f"Total number of lines is {i}")
+    print(f"number of lines in header: {i}")
 
 
 def get_consec(char,record, thresh=1000):
