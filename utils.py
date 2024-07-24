@@ -62,7 +62,7 @@ def get_header(file_path, thresh=10):
     print(f"value:{values}")
     values = values.astype(float)
     df_["sum"] = values.sum(axis=1)
-    ids_to_exlude = df_[df_["sum"] < 60]["sample_id"].values.tolist()
+    ids_to_exlude = df_[df_["sum"] < 200]["sample_id"].values.tolist()
     df_id = pd.DataFrame([[x] for x in ids_to_exlude])
     print(df_id)
     df_id.to_csv("id_to_exclude.csv", index=False)
@@ -82,7 +82,7 @@ def get_consec(char,record, thresh=1000):
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
     filter = [str(x).strip().lower().replace('"', '').replace("'", '') for x in exlude]
-    print(f"filter={filter}")
+    #print(f"filter={filter}")
     sequence_lengths = []
     logs = []
     
