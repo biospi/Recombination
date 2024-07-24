@@ -3,7 +3,7 @@ import typer
 from typing import List, Optional
 import warnings
 
-from utils import count_isolates_in_tar_gz, filter_isolates_in_tar_gz, run_cmd
+from utils import count_isolates_in_tar_gz, filter_isolates_in_tar_gz, get_header, run_cmd
 warnings.filterwarnings("ignore")
 import pandas as pd
 
@@ -13,7 +13,7 @@ def main(
         ..., exists=True, file_okay=True, dir_okay=False, resolve_path=True
     ),
     output_dir: str = "output",
-    exlude: List[str] = ["SRR5193868", "SRR5193995", "SRR7850489", "SRR5193283", "SRR3049562", "SRR7495458", "SRR8437386", "SRR7828233", "SRR7533537", "SRR5216167", "SRR1965543"], 
+    # exlude: List[str] = ["SRR5193868", "SRR5193995", "SRR7850489", "SRR5193283", "SRR3049562", "SRR7495458", "SRR8437386", "SRR7828233", "SRR7533537", "SRR5216167", "SRR1965543"], 
 ):
     exlude = []
     output_dir = Path(output_dir)
@@ -22,6 +22,8 @@ def main(
     print("loading...")
     iso_count = count_isolates_in_tar_gz(dataset_filepath.as_posix())
     print(f"Found {iso_count} isolates in {dataset_filepath}.")
+
+    get_header(dataset_filepath.as_posix(), iso_count*2)
 
     cleaned_tar_gz_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.tar.gz"
     if cleaned_tar_gz_filepath.exists():

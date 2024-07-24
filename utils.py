@@ -12,6 +12,15 @@ from pathlib import Path
 from collections import Counter
 import re
 import numpy as np
+import gzip
+
+
+def get_header(file_path, num_lines):
+    with gzip.open(file_path, 'rt') as f:  # Open the file in text mode
+        for i, line in enumerate(f):
+            if i >= num_lines:
+                break
+            print(f"Line {i + 1} length: {len(line.strip())}")
 
 
 def get_consec(char,record, thresh=1000):
@@ -53,14 +62,14 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                     with TextIOWrapper(file, encoding='utf-8') as fasta_file:
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
-                            print(record.id)
+                            #print(record.id)
                             if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
                                 continue
 
 
                             seq_len = len(record.seq)
                             char_count = Counter(record.seq)  # Count each character in the sequence
-                            log = f"{seq_len},{expected_length},{record.id},{record.seq},{str(dict(char_count)).replace(',', " ")}"
+                            log = f"{seq_len},{expected_length},{record.id},{record},{str(dict(char_count)).replace(',', " ")}"
                             print(log)
                             logs.append(log)
 
