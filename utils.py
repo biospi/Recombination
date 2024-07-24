@@ -20,16 +20,19 @@ def get_header(file_path):
     if output_file_path.exists():
         output_file_path.unlink()
 
-    with gzip.open(file_path, 'rt') as f, open(output_file_path.as_posix(), 'a',  encoding='utf-8') as output_file:
+    lines = []
+    with gzip.open(file_path, 'rt') as f:
         for i, line in enumerate(f):
             #print(f"Line {i + 1} length: {len(line.strip())}")
             if len(line.strip()) > 1500:
                 break
             line = line.replace('\t',',').strip()
             print(line)
-            output_file.write(line + '\n')
-    print(output_file_path.as_posix())
-    print(f"number of lines in header: {i}")
+            lines.append(line)
+    print(f"number of lines in header: {len(lines)}")
+    df = pd.DataFrame(lines, columns=lines[0])
+    df.to_csv(output_file_path, index=False)
+    print(output_file_path)
 
 
 def get_consec(char,record, thresh=1000):
