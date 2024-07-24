@@ -31,7 +31,10 @@ def get_header(file_path):
             lines.append(line)
     
 
+    #TODO fix header parsing not generalisable!
     cleaned_header = lines[0].replace('\x00', '')
+    cleaned_header = cleaned_header.replace("%", '')
+    cleaned_header = f"sample_id{cleaned_header.split('sample_id')[-1]}"
     print(cleaned_header)
     lines[0] = cleaned_header
         
@@ -185,3 +188,10 @@ def run_cmd(cmd_str, out_dir, tag, n_isolate):
     df["n_isolate"] = [n_isolate]
     df.to_csv(filepath, columns=['cmd_str', 'time_s', 'time_m', 'n_isolate'], index=False)
     return cmd_str
+
+
+if __name__ == "__main__":
+    test_string = "wgs-mapping/0000775000175000017500000000000014502606564012747 5ustar  ubuntuubuntuwgs-mapping/mapping_summary-NC_011294.tsv0000664000175000017500000512065314020412051020024 0ustar  ubuntuubuntusample_id,filesize_R1,filesize_R2,reads,reference,ref_length,mapped_reads,%mapped,unmapped_reads,%unmapped,average_coverage,Ns,%Ns,variants,snps,nonsyn,syn,intergenic,indels,insertion,deletion,intergenic_indels,genic_indels"
+    test_string = test_string.replace("%", '')
+    test_string = f"sample_id{test_string.split('sample_id')[-1]}"
+    print(test_string)
