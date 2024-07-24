@@ -19,11 +19,12 @@ def get_header(file_path):
     output_file_path = "header.txt"
     with gzip.open(file_path, 'rt') as f, open(output_file_path, 'a') as output_file:  # Open the file in text mode
         for i, line in enumerate(f):
-            if len(line.strip()) > 100:
-                break
-            print(line)
             print(f"Line {i + 1} length: {len(line.strip())}")
+            if len(line.strip()) > 500:
+                continue
+            print(line)
             output_file.write(line + '\n')
+    print(f"Total number of lines is {i}")
 
 
 def get_consec(char,record, thresh=1000):
@@ -66,8 +67,8 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             #print(record.id)
-                            if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
-                                continue
+                            # if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
+                            #     continue
 
 
                             seq_len = len(record.seq)
