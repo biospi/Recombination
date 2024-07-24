@@ -53,25 +53,30 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                     with TextIOWrapper(file, encoding='utf-8') as fasta_file:
                         sequences = []
                         for record in SeqIO.parse(fasta_file, "fasta"):
-                            seq_len = len(record.seq)
-                            char_count = Counter(record.seq)  # Count each character in the sequence
-                            log = f"{seq_len},{expected_length},{record.id},{record},{str(dict(char_count)).replace(',', " ")}"
-                            #print(log)
-                            logs.append(log)
-
-                            A_counts = get_consec('A', record)
-                            G_counts = get_consec('G', record)
-                            T_counts = get_consec('T', record)
-                            N_counts = get_consec('N', record)
-
-                            if record.id in exlude or len(A_counts) > 0 or len(G_counts) > 0 or len(T_counts) > 0 or len(N_counts) > 0:
-                                print(f"Excluding sequence {record.id} with length {seq_len} A_counts={A_counts}, G_counts={G_counts}, T_counts={T_counts}, N_counts={N_counts}")
+                            print(record.id)
+                            if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
                                 continue
 
-                            if seq_len == expected_length:
-                                sequences.append(record)
-                            else:
-                                print(f"Excluding sequence {record.id} with length {seq_len}")
+
+                            seq_len = len(record.seq)
+                            char_count = Counter(record.seq)  # Count each character in the sequence
+                            log = f"{seq_len},{expected_length},{record.id},{record.seq},{str(dict(char_count)).replace(',', " ")}"
+                            print(log)
+                            logs.append(log)
+
+                            # A_counts = get_consec('A', record)
+                            # G_counts = get_consec('G', record)
+                            # T_counts = get_consec('T', record)
+                            # N_counts = get_consec('N', record)
+
+                            # if record.id in exlude or len(A_counts) > 0 or len(G_counts) > 0 or len(T_counts) > 0 or len(N_counts) > 0:
+                            #     print(f"Excluding sequence {record.id} with length {seq_len} A_counts={A_counts}, G_counts={G_counts}, T_counts={T_counts}, N_counts={N_counts}")
+                            #     continue
+
+                            # if seq_len == expected_length:
+                            #     sequences.append(record)
+                            # else:
+                            #     print(f"Excluding sequence {record.id} with length {seq_len}")
 
                         if sequences:
                             # Create a temporary file to write filtered sequences
