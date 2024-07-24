@@ -15,7 +15,7 @@ import numpy as np
 import gzip
 
 
-def get_header(file_path):
+def get_header(file_path, thresh=10):
     output_file_path = Path("header.txt")
     if output_file_path.exists():
         output_file_path.unlink()
@@ -52,10 +52,18 @@ def get_header(file_path):
 
     cols = cleaned_header.split(',')
     print(f"cols: {cols}")
-    df = pd.DataFrame([x.split(',') for x in lines], columns=cols)
+    df = pd.DataFrame([x.split(',') for x in lines[1:]], columns=cols)
     print(df)
     df.to_csv("header.csv", index=False)
     print(output_file_path)
+
+    df_ = df[['sample_id', 'intergenic', 'indels', 'insertion', 'deletion', 'intergenic_indels','genic_indels']]
+    values = df_.drop(columns=['sample_id'])
+    mask = (values > thresh).all(axis=1)
+    result = df_.loc[mask, 'sample_id']
+    id_to_exluce = result.values.tolist()
+    print(f"n id_to_exluce:{len(id_to_exluce)}")
+    return id_to_exluce
 
 
 def get_consec(char,record, thresh=1000):
@@ -122,7 +130,14 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             # else:
                             #     print(f"Excluding sequence {record.id} with length {seq_len}")
 
-                        if sequences:
+                            if record.id in exlude:
+                                print(f"Excluding sequence {record.id} with length {seq_len}")
+                                continue
+
+                            sequences.append(record)
+
+
+                        if len(sequences) > 0:
                             # Create a temporary file to write filtered sequences
                             tmp_file = StringIO()
                             SeqIO.write(sequences, tmp_file, "fasta")

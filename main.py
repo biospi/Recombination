@@ -23,7 +23,7 @@ def main(
     iso_count = count_isolates_in_tar_gz(dataset_filepath.as_posix())
     print(f"Found {iso_count} isolates in {dataset_filepath}.")
 
-    get_header(dataset_filepath.as_posix())
+    exlude = get_header(dataset_filepath.as_posix())
 
     cleaned_tar_gz_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.tar.gz"
     if cleaned_tar_gz_filepath.exists():
