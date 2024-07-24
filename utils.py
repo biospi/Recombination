@@ -61,14 +61,13 @@ def get_header(file_path, thresh=10):
     values = df_.drop(columns=['sample_id'])
     print(f"value:{values}")
     values = values.astype(float)
-    mask = (values > thresh).all(axis=1)
-    result = df_.loc[mask, 'sample_id']
-    id_to_exluce = result.values.tolist()
-    df_id = pd.DataFrame([[x] for x in id_to_exluce])
+    df_["sum"] = values.sum(axis=1)
+    ids_to_exlude = df_[df_["sum"] < 60]["sample_id"].values.tolist()
+    df_id = pd.DataFrame([[x] for x in ids_to_exlude])
     print(df_id)
     df_id.to_csv("id_to_exclude.csv", index=False)
-    print(f"n id_to_exluce:{len(id_to_exluce)}")
-    return id_to_exluce
+    print(f"n id_to_exluce:{len(ids_to_exlude)}")
+    return ids_to_exlude
 
 
 def get_consec(char,record, thresh=1000):
@@ -112,12 +111,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                         sequences = []
                         cpt = 0
                         for record in SeqIO.parse(fasta_file, "fasta"):
-                            #print(record.id)
-                            # if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
-                            #     continue
                             r = str(record.id).strip().lower().replace('"', '').replace("'", '')
-                            if cpt < 10:
-                                print(r)
                             if r in filter:
                                 #print(f"Excluding sequence {record.id}")
                                 continue
