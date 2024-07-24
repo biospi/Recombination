@@ -59,6 +59,8 @@ def get_header(file_path, thresh=10):
 
     df_ = df[['sample_id', 'intergenic', 'indels', 'insertion', 'deletion', 'intergenic_indels','genic_indels']]
     values = df_.drop(columns=['sample_id'])
+    print(f"value:{values}")
+    values = values.astype(float)
     mask = (values > thresh).all(axis=1)
     result = df_.loc[mask, 'sample_id']
     id_to_exluce = result.values.tolist()
