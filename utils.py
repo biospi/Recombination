@@ -24,10 +24,11 @@ def get_header(file_path):
     with gzip.open(file_path, 'rt') as f:
         for i, line in enumerate(f):
             #print(f"Line {i + 1} length: {len(line.strip())}")
+            line = line.replace('\x00', '')
             if len(line.strip()) > 1500:
                 break
             line = line.replace('\t',',').strip()
-            print(line)
+            #print(line)
             lines.append(line)
     
 
