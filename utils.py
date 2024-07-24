@@ -13,7 +13,7 @@ from collections import Counter
 import re
 import numpy as np
 import gzip
-
+from tqdm import tqdm
 
 
 def get_header(file_path, thresh=10):
@@ -110,12 +110,12 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                 if file is not None:
                     with TextIOWrapper(file, encoding='utf-8') as fasta_file:
                         sequences = []
-                        for record in SeqIO.parse(fasta_file, "fasta"):
+                        for record in tqdm(SeqIO.parse(fasta_file, "fasta")):
                             #print(record.id)
                             # if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
                             #     continue
                             if str(record.id).strip().lower() not in [str(x).strip().lower for x in exlude]:
-                                print(f"Excluding sequence {record.id} with length {seq_len}")
+                                #print(f"Excluding sequence {record.id}")
                                 continue
 
                             seq_len = len(record.seq)
@@ -141,6 +141,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
 
 
                         if len(sequences) > 0:
+                            print(f"Found {len(sequences)} valid sequences. Exporting to new archive...")
                             # Create a temporary file to write filtered sequences
                             tmp_file = StringIO()
                             SeqIO.write(sequences, tmp_file, "fasta")
