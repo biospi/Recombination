@@ -13,8 +13,9 @@ def main(
         ..., exists=True, file_okay=True, dir_okay=False, resolve_path=True
     ),
     output_dir: str = "output",
-    exlude: List[str] = ["SRR5193868", "SRR5193995", "SRR7850489", "SRR5193283", "SRR3049562", "SRR7495458", "SRR8437386", "SRR7828233", "SRR7533537", "SRR5216167"], 
+    exlude: List[str] = ["SRR5193868", "SRR5193995", "SRR7850489", "SRR5193283", "SRR3049562", "SRR7495458", "SRR8437386", "SRR7828233", "SRR7533537", "SRR5216167", "SRR1965543"], 
 ):
+    exlude = []
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"dataset_filepath={dataset_filepath}")
