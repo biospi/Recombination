@@ -41,9 +41,11 @@ def get_header(file_path):
         
     print(f"number of lines in header: {len(lines)}")
     
-    print(np.unique([len(x) for x in lines]))
+    value_counts = pd.value_counts([len(x.split(',')) for x in lines])
+    print(value_counts)
+    most_frequent_value = value_counts.idxmax()
     
-    df = pd.DataFrame(lines, columns=lines[0])
+    df = pd.DataFrame([l for l in lines if len(l.split(',')) == most_frequent_value], columns=lines[0])
     df.to_csv(output_file_path, index=False)
     print(output_file_path)
 
