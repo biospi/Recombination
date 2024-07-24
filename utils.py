@@ -16,7 +16,7 @@ import gzip
 
 
 def get_header(file_path):
-    output_file_path = Path("header.csv")
+    output_file_path = Path("header.txt")
     if output_file_path.exists():
         output_file_path.unlink()
 
@@ -29,6 +29,8 @@ def get_header(file_path):
                 break
             line = line.replace('\t',',').strip()
             #print(line)
+            if 'na' in line.lower():
+                continue
             lines.append(line)
     
 
@@ -40,14 +42,9 @@ def get_header(file_path):
     lines[0] = cleaned_header
         
     print(f"number of lines in header: {len(lines)}")
-    
-    value_counts = pd.value_counts([len(x.split(',')) for x in lines])
-    print(value_counts)
-    most_frequent_value = value_counts.idxmax()
-    valid_lines = [l for l in lines if len(l.split(',')) == most_frequent_value and '/' not in l]
-    print(valid_lines)
-    df = pd.DataFrame(valid_lines, columns=lines[0])
-    df.to_csv(output_file_path, index=False)
+    with open(output_file_path.as_posix(), 'w') as file:
+        for line in lines:
+            file.write(line + '\n')
     print(output_file_path)
 
 
