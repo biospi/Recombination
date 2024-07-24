@@ -15,11 +15,12 @@ import numpy as np
 import gzip
 
 
-def get_header(file_path, num_lines):
+def get_header(file_path):
     with gzip.open(file_path, 'rt') as f:  # Open the file in text mode
         for i, line in enumerate(f):
-            if i >= num_lines:
+            if len(line.strip()) > 100:
                 break
+            print(line)
             print(f"Line {i + 1} length: {len(line.strip())}")
 
 
