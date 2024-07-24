@@ -29,6 +29,15 @@ def get_header(file_path):
             line = line.replace('\t',',').strip()
             print(line)
             lines.append(line)
+    
+
+    cleaned_header = lines[0].replace('\x00', '')
+    csv_header_match = re.search(r'([a-zA-Z_]+,)+[a-zA-Z_]+', cleaned_header)
+    if csv_header_match:
+        result = csv_header_match.group(0)
+        print(result)
+    lines[0] = result
+        
     print(f"number of lines in header: {len(lines)}")
     df = pd.DataFrame(lines, columns=lines[0])
     df.to_csv(output_file_path, index=False)
