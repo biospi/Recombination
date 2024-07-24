@@ -83,7 +83,7 @@ def get_consec(char,record, thresh=1000):
 
 def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
-    print(f"exlude={exlude}")
+    #print(f"exlude={exlude}")
     sequence_lengths = []
     logs = []
     
@@ -114,7 +114,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             #print(record.id)
                             # if record.id not in ['SRR5193283', 'SRR3049562', 'SRR6900352']:
                             #     continue
-                            if str(record.id).strip().lower() in [str(x).strip().lower for x in exlude]:
+                            if str(record.id).strip().lower() not in [str(x).strip().lower for x in exlude]:
                                 print(f"Excluding sequence {record.id} with length {seq_len}")
                                 continue
 
