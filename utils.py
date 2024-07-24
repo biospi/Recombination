@@ -16,12 +16,13 @@ import gzip
 
 
 def get_header(file_path):
-    output_file_path = "header.txt"
+    output_file_path = "header.csv"
     with gzip.open(file_path, 'rt') as f, open(output_file_path, 'a') as output_file:  # Open the file in text mode
         for i, line in enumerate(f):
-            print(f"Line {i + 1} length: {len(line.strip())}")
-            if len(line.strip()) > 500:
-                continue
+            #print(f"Line {i + 1} length: {len(line.strip())}")
+            if len(line.strip()) > 1500:
+                break
+            line = line.replace(' ',',').strip()
             print(line)
             output_file.write(line + '\n')
     print(f"Total number of lines is {i}")
