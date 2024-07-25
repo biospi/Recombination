@@ -58,12 +58,16 @@ def get_header(file_path, thresh=10):
     print(output_file_path)
     df["mapped"] = df["mapped"].astype(float)
     print(f"mapped:{df['mapped']}")
-    df_to_exlude = df[df["mapped"] > 98][["sample_id", "mapped"]]
+    df_to_exlude = df[df["mapped"] < 98][["sample_id", "mapped"]]
     print(df_to_exlude)
     df_to_exlude.to_csv("id_to_exclude.csv", index=False)
     print(f"n id_to_exluce:{len(df_to_exlude)}/{len(df["sample_id"].values.tolist())}")
     ids_to_exlude = df_to_exlude["sample_id"].values.tolist()
     print(ids_to_exlude)
+
+    df_to_keep = df[df["mapped"] > 98][["sample_id", "mapped"]]
+    df_to_keep.to_csv("id_to_keep.csv", index=False)
+
     return ids_to_exlude
 
 
