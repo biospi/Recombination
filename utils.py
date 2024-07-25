@@ -57,12 +57,7 @@ def get_header(file_path, thresh=10):
     df.to_csv("header.csv", index=False)
     print(output_file_path)
 
-    df_ = df[['sample_id', 'intergenic', 'indels', 'insertion', 'deletion', 'intergenic_indels','genic_indels']]
-    values = df_.drop(columns=['sample_id'])
-    print(f"value:{values}")
-    values = values.astype(float)
-    df_["sum"] = values.sum(axis=1)
-    ids_to_exlude = df_[df_["sum"] < 200]["sample_id"].values.tolist()
+    ids_to_exlude = df[df["mapped"] > 98]["sample_id"].values.tolist()
     df_id = pd.DataFrame([[x] for x in ids_to_exlude])
     print(df_id)
     df_id.to_csv("id_to_exclude.csv", index=False)
