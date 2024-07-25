@@ -57,7 +57,7 @@ def get_header(file_path, thresh=10):
     df.to_csv("header.csv", index=False)
     print(output_file_path)
 
-    ids_to_exlude = df[df["mapped"] > 98]["sample_id"].values.tolist()
+    ids_to_exlude = df[df["mapped"].astype(float) > 98]["sample_id"].values.tolist()
     df_id = pd.DataFrame([[x] for x in ids_to_exlude])
     print(df_id)
     df_id.to_csv("id_to_exclude.csv", index=False)
