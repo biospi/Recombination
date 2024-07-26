@@ -61,7 +61,7 @@ def get_header(file_path, thresh=10):
     df_to_exlude = df[df["mapped"] < 98][["sample_id", "mapped"]]
     print(df_to_exlude)
     df_to_exlude.to_csv("id_to_exclude.csv", index=False)
-    print(f"n id_to_exluce:{len(df_to_exlude)}/{len(df["sample_id"].values.tolist())}")
+    print(f"n id_to_exluce:{len(df_to_exlude)}/{len(df['sample_id'].values.tolist())}")
     ids_to_exlude = df_to_exlude["sample_id"].values.tolist()
     print(ids_to_exlude)
 
@@ -103,7 +103,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Expected sequence length: {expected_length}")
 
     # Now filter sequences based on the expected length and minimum length
-    with tarfile.open(tar_gz_filepath, "r:gz") as tar, tarfile.open(cleaned_tar_gz_filepath, "w:gz") as cleaned_tar:
+    with tarfile.open(tar_gz_filepath, "r:gz") as tar, open(cleaned_tar_gz_filepath, "w") as cleaned_tar:
         for member in tar.getmembers():
             if member.isfile() and member.name.endswith('.fasta'):
                 file = tar.extractfile(member)
@@ -124,6 +124,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             logs.append(log)
                             sequences.append(record)
                             cpt += 1
+                            SeqIO.write([record.seq], cleaned_tar, "fasta")
 
                             # A_counts = get_consec('A', record)
                             # G_counts = get_consec('G', record)
@@ -140,24 +141,24 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             #     print(f"Excluding sequence {record.id} with length {seq_len}")
 
 
-                        if len(sequences) > 0:
-                            print(f"Found {len(sequences)} valid sequences. Exporting to new archive...")
-                            # Create a temporary file to write filtered sequences
-                            tmp_file = StringIO()
-                            SeqIO.write(sequences, tmp_file, "fasta")
-                            tmp_file.seek(0)
+                        # if len(sequences) > 0:
+                        #     print(f"Found {len(sequences)} valid sequences. Exporting to new archive...")
+                        #     # Create a temporary file to write filtered sequences
+                        #     tmp_file = StringIO()
+                        #     SeqIO.write(sequences, tmp_file, "fasta")
+                        #     tmp_file.seek(0)
 
-                            # Convert StringIO content to bytes
-                            byte_file = BytesIO(tmp_file.getvalue().encode('utf-8'))
-                            byte_file.seek(0)
+                        #     # Convert StringIO content to bytes
+                        #     byte_file = BytesIO(tmp_file.getvalue().encode('utf-8'))
+                        #     byte_file.seek(0)
 
-                            # Create a new tarinfo object for the filtered sequences file
-                            tarinfo = tarfile.TarInfo(name=member.name)
-                            tarinfo.size = len(byte_file.getvalue())
-                            byte_file.seek(0)  # Reset the pointer to the beginning
+                        #     # Create a new tarinfo object for the filtered sequences file
+                        #     tarinfo = tarfile.TarInfo(name=member.name)
+                        #     tarinfo.size = len(byte_file.getvalue())
+                        #     byte_file.seek(0)  # Reset the pointer to the beginning
 
-                            # Add the filtered sequences file to the new tar.gz archive
-                            cleaned_tar.addfile(tarinfo, fileobj=byte_file)
+                        #     # Add the filtered sequences file to the new tar.gz archive
+                        #     cleaned_tar.addfile(tarinfo, fileobj=byte_file)
 
     # Save logs to a CSV file
     log_df = pd.DataFrame([log.split(",") for log in logs], columns=["seq_len", "expected_length", "record_id", "record", "count"])

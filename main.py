@@ -24,15 +24,16 @@ def main(
 
     exlude = get_header(dataset_filepath.as_posix())
 
-    cleaned_tar_gz_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.tar.gz"
+    cleaned_tar_gz_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.fasta"
     if cleaned_tar_gz_filepath.exists():
         print(f"Deleting {cleaned_tar_gz_filepath}...")
         cleaned_tar_gz_filepath.unlink()
 
     filter_isolates_in_tar_gz(dataset_filepath.as_posix(), cleaned_tar_gz_filepath.as_posix(), exlude)
     
-    iso_count = count_isolates_in_tar_gz(cleaned_tar_gz_filepath.as_posix())
-    print(f"Found {iso_count} isolates in {cleaned_tar_gz_filepath}.")
+    # iso_count = count_isolates_in_tar_gz(cleaned_tar_gz_filepath.as_posix())
+    # print(f"Found {iso_count} isolates in {cleaned_tar_gz_filepath}.")
+
 
     filepath_vcf = Path(f"{cleaned_tar_gz_filepath.name}.vcf")
     print(filepath_vcf)
@@ -46,6 +47,7 @@ def main(
 
 
 if __name__ == "__main__":
-    #dataset_filepath = Path("wgs-mapping.tar.gz")
-    #main(dataset_filepath)
+    #dataset_filepath = Path("cleaned-wgs-mapping.tar.gz")
+    # dataset_filepath = Path("mapping-NC_011294.snp_sites.fasta")
+    # main(dataset_filepath)
     typer.run(main)
