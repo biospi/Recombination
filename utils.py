@@ -124,7 +124,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             logs.append(log)
                             sequences.append(record)
                             cpt += 1
-                            SeqIO.write([record.seq], cleaned_tar, "fasta")
+                            SeqIO.write([record], cleaned_tar, "fasta")
 
                             # A_counts = get_consec('A', record)
                             # G_counts = get_consec('G', record)
