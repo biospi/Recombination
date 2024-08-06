@@ -56,19 +56,19 @@ def get_header(file_path, thresh=10):
     print(df)
     df.to_csv("header.csv", index=False)
     print(output_file_path)
-    df["mapped"] = df["mapped"].astype(float)
-    print(f"mapped:{df['mapped']}")
-    df_to_exlude = df[df["mapped"] < 98][["sample_id", "mapped"]]
-    print(df_to_exlude)
-    df_to_exlude.to_csv("id_to_exclude.csv", index=False)
-    print(f"n id_to_exluce:{len(df_to_exlude)}/{len(df['sample_id'].values.tolist())}")
-    ids_to_exlude = df_to_exlude["sample_id"].values.tolist()
-    print(ids_to_exlude)
+    # df["mapped"] = df["mapped"].astype(float)
+    # print(f"mapped:{df['mapped']}")
+    # df_to_exlude = df[df["mapped"] < 98][["sample_id", "mapped"]]
+    # print(df_to_exlude)
+    # df_to_exlude.to_csv("id_to_exclude.csv", index=False)
+    # print(f"n id_to_exluce:{len(df_to_exlude)}/{len(df['sample_id'].values.tolist())}")
+    # ids_to_exlude = df_to_exlude["sample_id"].values.tolist()
+    # #print(ids_to_exlude)
 
-    df_to_keep = df[df["mapped"] > 98][["sample_id", "mapped"]]
-    df_to_keep.to_csv("id_to_keep.csv", index=False)
-
-    return ids_to_exlude
+    # df_to_keep = df[df["mapped"] > 98][["sample_id", "mapped"]]
+    # df_to_keep.to_csv("id_to_keep.csv", index=False)
+    # ids_to_keep = df_to_keep["sample_id"].values.tolist()
+    return 
 
 
 def get_consec(char,record, thresh=1000):
@@ -80,9 +80,9 @@ def get_consec(char,record, thresh=1000):
     return counts
     
 
-def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
-    print(f"Cleaning raw data in {cleaned_tar_gz_filepath}...")
-    filter = [str(x).strip().lower().replace('"', '').replace("'", '') for x in exlude]
+def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_filepath, to_keep):
+    print(f"Cleaning raw data in {cleaned_filepath}...")
+    filter = [str(x).strip().lower().replace('"', '').replace("'", '') for x in to_keep]
     #print(f"filter={filter}")
     sequence_lengths = []
     logs = []
@@ -103,7 +103,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     print(f"Expected sequence length: {expected_length}")
 
     # Now filter sequences based on the expected length and minimum length
-    with tarfile.open(tar_gz_filepath, "r:gz") as tar, open(cleaned_tar_gz_filepath, "w") as cleaned_tar:
+    with tarfile.open(tar_gz_filepath, "r:gz") as tar, open(cleaned_filepath, "w") as cleaned:
         for member in tar.getmembers():
             if member.isfile() and member.name.endswith('.fasta'):
                 file = tar.extractfile(member)
@@ -113,8 +113,8 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                         cpt = 0
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             r = str(record.id).strip().lower().replace('"', '').replace("'", '')
-                            if r in filter:
-                                #print(f"Excluding sequence {record.id}")
+                            if r not in filter:
+                                print(f"Excluding sequence {record.id}")
                                 continue
 
                             seq_len = len(record.seq)
@@ -124,7 +124,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
                             logs.append(log)
                             sequences.append(record)
                             cpt += 1
-                            SeqIO.write([record], cleaned_tar, "fasta")
+                            SeqIO.write([record], cleaned, "fasta")
 
                             # A_counts = get_consec('A', record)
                             # G_counts = get_consec('G', record)
@@ -165,6 +165,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_tar_gz_filepath, exlude):
     log_csv_filepath = Path("log.csv")
     log_df.to_csv(log_csv_filepath, index=False)
     print(f"Logs saved to {log_csv_filepath}")
+    return cpt
 
 
 def count_isolates_in_tar_gz(tar_gz_filepath):
