@@ -43,7 +43,7 @@ def cluster(output_dir, start_date = '2014-01-01', end_date = '2015-12-31'):
     df = read_ods(path)
     df['RECEIPT_datetime'] = pd.to_datetime(df['RECEIPT'], format='%Y-%m-%d')
     print(df)
-    df['Cluster'] = group_snp_addresses(df["SNP"].values.tolist(), 3)
+    df['Cluster'] = group_snp_addresses(df["SNP"].values.tolist(), 5)
     df = df.sort_values("RECEIPT_datetime")
     df = df.sort_values("Cluster")
     print(df)
