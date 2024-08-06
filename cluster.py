@@ -1,5 +1,6 @@
 from pandas_ods_reader import read_ods
 import pandas as pd
+from pathlib import Path
 
 
 def parse_address(address):
@@ -35,7 +36,7 @@ def group_snp_addresses(snp_list, threshold):
 
 
 
-def cluster(start_date = '2014-01-01', end_date = '2015-12-31'):
+def cluster(output_dir, start_date = '2014-01-01', end_date = '2015-12-31'):
     start_date = pd.to_datetime(start_date, format='%Y-%m-%d')
     end_date = pd.to_datetime(end_date, format='%Y-%m-%d')
     path = "metadata.ods"
@@ -46,7 +47,7 @@ def cluster(start_date = '2014-01-01', end_date = '2015-12-31'):
     df = df.sort_values("RECEIPT_datetime")
     df = df.sort_values("Cluster")
     print(df)
-    df.to_csv("meta_with_cluster.csv", index=False)
+    df.to_csv(output_dir / "meta_with_cluster.csv", index=False)
 
     df_subset = df[(df['RECEIPT_datetime'] >= start_date) & (df['RECEIPT_datetime'] <= end_date)]
     isolates = df_subset["SRA Accession"].values.tolist()
@@ -56,7 +57,10 @@ def cluster(start_date = '2014-01-01', end_date = '2015-12-31'):
     for df_ in dfs:
         df_cluster = pd.DataFrame(df_["SRA Accession"].values.tolist())
         culster_id = df_["Cluster"].values.tolist()[0]
-        filepath = f"cluster_{culster_id}.csv"
+        filename = f"cluster_{culster_id}.csv"
+        out_dir = output_dir / "clusters"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        filepath = out_dir / filename
         print(filepath)
         cluster_list.append(filepath)
         df_cluster.to_csv(filepath, index=False)

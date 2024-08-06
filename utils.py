@@ -15,8 +15,8 @@ import numpy as np
 import gzip
 
 
-def get_header(file_path, thresh=10):
-    output_file_path = Path("header.txt")
+def get_header(output_dir, file_path, thresh=10):
+    output_file_path = output_dir / "header.txt"
     if output_file_path.exists():
         output_file_path.unlink()
 
@@ -54,7 +54,7 @@ def get_header(file_path, thresh=10):
     print(f"cols: {cols}")
     df = pd.DataFrame([x.split(',') for x in lines[1:]], columns=cols)
     print(df)
-    df.to_csv("header.csv", index=False)
+    df.to_csv(output_dir / "header.csv", index=False)
     print(output_file_path)
     # df["mapped"] = df["mapped"].astype(float)
     # print(f"mapped:{df['mapped']}")
@@ -80,7 +80,7 @@ def get_consec(char,record, thresh=1000):
     return counts
     
 
-def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_filepath, to_keep):
+def filter_isolates_in_tar_gz(out_dir, tar_gz_filepath, cleaned_filepath, to_keep):
     print(f"Cleaning raw data in {cleaned_filepath}...")
     filter = [str(x).strip().lower().replace('"', '').replace("'", '') for x in to_keep]
     #print(f"filter={filter}")
@@ -114,7 +114,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_filepath, to_keep):
                         for record in SeqIO.parse(fasta_file, "fasta"):
                             r = str(record.id).strip().lower().replace('"', '').replace("'", '')
                             if r not in filter:
-                                print(f"Excluding sequence {record.id}")
+                                #print(f"Excluding sequence {record.id}")
                                 continue
 
                             seq_len = len(record.seq)
@@ -162,7 +162,7 @@ def filter_isolates_in_tar_gz(tar_gz_filepath, cleaned_filepath, to_keep):
 
     # Save logs to a CSV file
     log_df = pd.DataFrame([log.split(",") for log in logs], columns=["seq_len", "expected_length", "record_id", "record", "count"])
-    log_csv_filepath = Path("log.csv")
+    log_csv_filepath = out_dir / "log.csv"
     log_df.to_csv(log_csv_filepath, index=False)
     print(f"Logs saved to {log_csv_filepath}")
     return cpt

@@ -23,15 +23,15 @@ def main(
     iso_count = count_isolates_in_tar_gz(dataset_filepath)
     print(f"Found {iso_count} isolates in {dataset_filepath}.")
 
-    get_header(dataset_filepath.as_posix())
-    isolates, cluster_list = cluster()
+    get_header(output_dir, dataset_filepath.as_posix())
+    isolates, cluster_list = cluster(output_dir)
 
     cleaned_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.fasta"
     if cleaned_filepath.exists():
         print(f"Deleting {cleaned_filepath}...")
         cleaned_filepath.unlink()
 
-    iso_count = filter_isolates_in_tar_gz(dataset_filepath.as_posix(), cleaned_filepath.as_posix(), isolates)
+    iso_count = filter_isolates_in_tar_gz(output_dir, dataset_filepath.as_posix(), cleaned_filepath.as_posix(), isolates)
     
     # # iso_count = count_isolates_in_tar_gz(cleaned_tar_gz_filepath.as_posix())
     # # print(f"Found {iso_count} isolates in {cleaned_tar_gz_filepath}.")
