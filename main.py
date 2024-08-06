@@ -20,7 +20,7 @@ def main(
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"dataset_filepath={dataset_filepath}")
     print("loading...")
-    iso_count = count_isolates_in_tar_gz(dataset_filepath.as_posix())
+    iso_count = count_isolates_in_tar_gz(dataset_filepath)
     print(f"Found {iso_count} isolates in {dataset_filepath}.")
 
     get_header(dataset_filepath.as_posix())
@@ -49,7 +49,7 @@ def main(
 
 
 if __name__ == "__main__":
-    dataset_filepath = Path("wgs-mapping.tar.gz")
-    #dataset_filepath = Path("mapping-NC_011294.snp_sites.fasta")
-    main(dataset_filepath)
-    #typer.run(main)
+    # dataset_filepath = Path("wgs-mapping.tar.gz")
+    # #dataset_filepath = Path("mapping-NC_011294.snp_sites.fasta")
+    # main(dataset_filepath)
+    typer.run(main)
