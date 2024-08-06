@@ -49,7 +49,8 @@ def cluster(output_dir, start_date = '2014-01-01', end_date = '2015-12-31'):
     print(df)
     df.to_csv(output_dir / "meta_with_cluster.csv", index=False)
 
-    df_subset = df[(df['RECEIPT_datetime'] >= start_date) & (df['RECEIPT_datetime'] <= end_date)]
+    #df_subset = df[(df['RECEIPT_datetime'] >= start_date) & (df['RECEIPT_datetime'] <= end_date)]
+    df_subset = df
     isolates = df_subset["SRA Accession"].values.tolist()
 
     dfs = [group for _, group in df_subset.groupby(["Cluster"])]

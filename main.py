@@ -52,4 +52,5 @@ if __name__ == "__main__":
     # dataset_filepath = Path("wgs-mapping.tar.gz")
     # #dataset_filepath = Path("mapping-NC_011294.snp_sites.fasta")
     # main(dataset_filepath)
-    typer.run(main)
+    #typer.run(main)
+    cluster(Path("output"))
