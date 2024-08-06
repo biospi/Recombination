@@ -16,9 +16,12 @@ def main(
     ),
     output_dir: str = "output"
 ):
-    filepath_vcf = Path(f"{dataset_filepath.name}.vcf")
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    filepath_vcf = output_dir / f"{dataset_filepath.name}.vcf"
+
     if not filepath_vcf.exists():
         print(f"dataset_filepath={dataset_filepath}")
         print("loading...")
@@ -28,7 +31,7 @@ def main(
         get_header(output_dir, dataset_filepath.as_posix())
         isolates, cluster_list = cluster(output_dir)
 
-        cleaned_filepath = dataset_filepath.parent / "cleaned-wgs-mapping.fasta"
+        cleaned_filepath = dataset_filepath.parent / "wgs-mapping.fasta"
         if cleaned_filepath.exists():
             print(f"Deleting {cleaned_filepath}...")
             cleaned_filepath.unlink()
