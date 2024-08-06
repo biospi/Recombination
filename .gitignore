@@ -2,3 +2,6 @@
 output
 wgs-mapping.tar.gz
 __pycache__
+*.vcf
+*.gz
+*.fasta
