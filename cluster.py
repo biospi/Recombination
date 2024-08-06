@@ -21,7 +21,7 @@ def group_snp_addresses(snp_list, threshold):
     
     for address in parsed_addresses:
         # Build the prefix from the address up to the threshold level
-        prefix = tuple(address[:threshold])
+        prefix = tuple(address[:-threshold])
         if prefix in prefix_to_group:
             assigned_group = prefix_to_group[prefix]
         else:
