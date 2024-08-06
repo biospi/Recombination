@@ -64,6 +64,6 @@ def cluster(output_dir, start_date = '2014-01-01', end_date = '2015-12-31'):
         filepath = out_dir / filename
         print(filepath)
         cluster_list.append(filepath)
-        df_cluster.to_csv(filepath, index=False)
+        df_cluster.to_csv(filepath, index=False, header=False)
     
     return isolates, cluster_list

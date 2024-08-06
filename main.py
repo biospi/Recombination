@@ -5,6 +5,7 @@ import warnings
 
 from cluster import cluster
 from utils import count_isolates_in_tar_gz, filter_isolates_in_tar_gz, get_header, run_cmd
+from vcf2cp import vcf2cp
 warnings.filterwarnings("ignore")
 import pandas as pd
 
@@ -36,16 +37,18 @@ def main(
     # # iso_count = count_isolates_in_tar_gz(cleaned_tar_gz_filepath.as_posix())
     # # print(f"Found {iso_count} isolates in {cleaned_tar_gz_filepath}.")
 
-
     filepath_vcf = Path(f"{dataset_filepath.name}.vcf")
-    print(filepath_vcf)
-    print("building snp file...")
-    run_cmd(
-        f"snp-sites -o {filepath_vcf.as_posix()} -v {cleaned_filepath.as_posix()}",
-        output_dir,
-        "vcf",
-        iso_count,
-    )
+    if not filepath_vcf.exists():
+        print(filepath_vcf)
+        print("building snp file...")
+        run_cmd(
+            f"snp-sites -o {filepath_vcf.as_posix()} -v {cleaned_filepath.as_posix()}",
+            output_dir,
+            "vcf",
+            iso_count,
+        )
+
+    vcf2cp(input_vcf=filepath_vcf.as_posix(), ploidy=1, output_prefix=(output_dir / "vcf2cp_").as_posix())
 
 
 if __name__ == "__main__":
