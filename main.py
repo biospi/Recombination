@@ -105,6 +105,6 @@ def main(
 
 
 if __name__ == "__main__":
-    dataset_filepath = Path("wgs-mapping.tar.gz")
-    main(dataset_filepath)
-    #typer.run(main)
+    #dataset_filepath = Path("wgs-mapping.tar.gz")
+    #main(dataset_filepath)
+    typer.run(main)
