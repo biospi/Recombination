@@ -2,6 +2,8 @@
 import typer
 import sys
 import re
+from tqdm import tqdm
+from pathlib import Path
 
 
 # Helper function to print help message and exit
@@ -58,6 +60,10 @@ def process_vcf_snps(vcf_file, jitter):
 
 # Function to process individuals and write output
 def process_individuals(vcf_file, output_prefix, numindsmaxsize, nsnps, posvec, ploidy):
+    if Path(f"{output_prefix}.phase").exists():
+        print("output already exists.")
+        return
+    
     ids = process_vcf_header(vcf_file)
     ninds = len(ids)
     nhaps = ninds * ploidy
@@ -71,7 +77,7 @@ def process_individuals(vcf_file, output_prefix, numindsmaxsize, nsnps, posvec, 
         out_phase.write(f"{nsnps}\n")
         out_phase.write("P " + ' '.join(map(str, posvec)) + '\n')
 
-        for a in range(numsplits):
+        for a in tqdm(range(numsplits)):
             start_ind = a * numindsmaxsize
             end_ind = min((a + 1) * numindsmaxsize, ninds)
             genomat = [[None] * nsnps for _ in range(ploidy * (end_ind - start_ind))]
