@@ -26,9 +26,9 @@ def help():
 def makeuniformrecfile(phasefile: str, outputfile: str, centimorgansperbase: float = 1.0 / 10000000):
     print(f"phasefile={phasefile}")
     print(f"outputfile={outputfile}")
-    
+
     if Path(outputfile).exists():
-        print("output already exist.")
+        print(f"output {outputfile} already exist.")
         return
     
     snplocs = ""

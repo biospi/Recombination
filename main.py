@@ -85,8 +85,26 @@ def main(
         + str(datetime.timedelta(seconds=end - start))
     )
 
+    print("finestructure...")
+    start = time.time()
+    ids = (output_dir / "vcf2cp_.ids").as_posix()
+    recomb = (output_dir / "vcf2cp_.recomb").as_posix()
+    phase = (output_dir / "vcf2cp_.phase").as_posix()
+    out = output_dir.as_posix()
+    #chmod 777 ./fs_4.1.1/fs_linux_glibc2.3
+    run_cmd(
+        f"./fs_4.1.1/fs_linux_glibc2.3 cp -j -b -t {ids} -a 1 1 -r {recomb} -n 0.001 -M 0.001 -g {phase} -o {out}",
+        output_dir,
+        "fs"
+    )
+    end = time.time()
+    print(
+        "time (H:M:S.mm)= "
+        + str(datetime.timedelta(seconds=end - start))
+    )
+
 
 if __name__ == "__main__":
-    #dataset_filepath = Path("wgs-mapping.tar.gz")
-    #main(dataset_filepath)
-    typer.run(main)
+    dataset_filepath = Path("wgs-mapping.tar.gz")
+    main(dataset_filepath)
+    #typer.run(main)

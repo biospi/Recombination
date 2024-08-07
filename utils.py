@@ -198,7 +198,7 @@ def count_isolates(fasta_filepath):
     return count
 
 
-def run_cmd(cmd_str, out_dir, tag, n_isolate):
+def run_cmd(cmd_str, out_dir, tag, n_isolate=-1):
     print(cmd_str)
     start = time.time()
     result = subprocess.call(cmd_str, shell=True, stdout=subprocess.PIPE)
