@@ -60,9 +60,9 @@ def process_vcf_snps(vcf_file, jitter):
 
 # Function to process individuals and write output
 def process_individuals(vcf_file, output_prefix, numindsmaxsize, nsnps, posvec, ploidy):
-    if Path(f"{output_prefix}.phase").exists():
-        print("output already exists.")
-        return
+    # if Path(f"{output_prefix}.phase").exists():
+    #     print("output already exists.")
+    #     return
     
     ids = process_vcf_header(vcf_file)
     ninds = len(ids)

@@ -6,3 +6,16 @@ __pycache__
 *.gz
 *.fasta
 *.out
+*.png
+*.csv
+*.3
+output2
+output3
+*.tsv
+*.fa
+*.fasta
+*.tre
+*.log
+*.imiss
+*.lmiss
+*.Identifier
