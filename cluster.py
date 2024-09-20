@@ -67,3 +67,7 @@ def cluster(output_dir, start_date = '2014-01-01', end_date = '2015-12-31'):
         df_cluster.to_csv(filepath, index=False, header=False)
     
     return isolates, cluster_list
+
+
+if "__name__" == __main__:
+    cluster(Path("output"))

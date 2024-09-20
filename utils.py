@@ -21,6 +21,7 @@ from functools import partial
 from Bio import SeqIO
 
 from tqdm import tqdm
+import subprocess
 
 def get_header(output_dir, file_path, thresh=10):
     output_file_path = output_dir / "header.txt"
@@ -403,7 +404,10 @@ def filter_samples_by_missingness_and_remove_star(vcf_file, output_file, thresho
             out.write('\t'.join([line[i] for i in samples_to_keep]) + '\n')  
 
 
-def build_target_files(vcf_file):
+def build_target_files(vcf_file, cluster_file):
+    df_clusters = pd.read_csv(cluster_file)
+    print(df_clusters)
+
     vcf_file = Path(vcf_file)
     out_dir = vcf_file.parent / "targets"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -426,27 +430,33 @@ def build_target_files(vcf_file):
                 sample_columns = {name: [] for name in sample_names}
                 variant_counts = {name: {"total": 0, "variant": 0} for name in sample_names}
             else:
+                pass
                 # Extract the variant information and corresponding sample columns
-                variant_info = line.strip().split("\t")
-                for i, sample_name in enumerate(sample_names):
-                    sample_data = variant_info[9 + i]
-                    # Add the variant info plus the sample data
-                    sample_columns[sample_name].append("\t".join(variant_info[:9] + [sample_data]))
+                # variant_info = line.strip().split("\t")
+                # for i, sample_name in enumerate(sample_names):
+                #     sample_data = variant_info[9 + i]
+                #     # Add the variant info plus the sample data
+                #     sample_columns[sample_name].append("\t".join(variant_info[:9] + [sample_data]))
                     
-                    # Calculate variability level
-                    variant_counts[sample_name]["total"] += 1
-                    if sample_data.startswith("1") or sample_data.startswith("0/1"):
-                        variant_counts[sample_name]["variant"] += 1
+                #     # Calculate variability level
+                #     variant_counts[sample_name]["total"] += 1
+                #     if sample_data.startswith("1") or sample_data.startswith("0/1"):
+                #         variant_counts[sample_name]["variant"] += 1
 
     # Create individual VCF files for each sample
     for sample_name in sample_names:
+        df_meta = df_clusters[df_clusters["SRA Accession"] == sample_name][['SNP', 'Cluster', 'Country']]
+        meta_str = [str(x).replace('.','_') for x in df_meta.values[0].tolist()]
+        meta_str = ' '.join(meta_str)
         total_variants = variant_counts[sample_name]["total"]
         non_ref_variants = variant_counts[sample_name]["variant"]
         # Calculate variability level as a percentage
         variability_level = int((non_ref_variants / total_variants) * 100) if total_variants > 0 else 0
         
         # Prepend variability level to the filename
-        target_file = out_dir / f"{variability_level}_{sample_name}.vcf"
+        target_file = out_dir / f"{variability_level}_{sample_name}_{meta_str}.vcf"
+        with open(out_dir / f"{sample_name}.txt", "w") as file:
+            file.write(sample_name)
         print(target_file)
         with target_file.open("w") as f:
             # Write the header and then the variant information for the sample
@@ -455,6 +465,52 @@ def build_target_files(vcf_file):
 
     print(f"Target files created in {out_dir}")
 
+
+def get_sample_names(vcf_file):
+    sample_names = []
+    
+    with open(vcf_file, 'r') as file:
+        for line in file:
+            if line.startswith("#CHROM"):
+                headers = line.strip().split("\t")
+                sample_names = headers[9:]  # Sample names start from the 10th column (index 9)
+                break
+    
+    return sample_names
+
+def build_population_file(ref_file, cluster_file):
+    samples = get_sample_names(ref_file)
+    df_samples = pd.DataFrame(samples, columns=['SRA Accession'])
+    print(df_samples)
+    df_clusters = pd.read_csv(cluster_file)
+    print(df_clusters.columns)
+
+    df_merged = pd.merge(df_samples, df_clusters[['SRA Accession', 'Cluster']], on='SRA Accession', how='left')
+    print(df_merged)
+    # Export the merged dataframe to 'pop.txt' without the header
+    out_file = ref_file.parent / 'pop.txt'
+    print(out_file)
+    df_merged.to_csv(out_file, sep='\t', index=False, header=False)
+
+
+def build_sparsepainter_strings(targets_dir):
+    vcf_files = list(targets_dir.glob("*.vcf"))
+    for file in vcf_files:
+        txt_filename = file.stem.split('_')[1]
+        id_filepath = targets_dir / f"{txt_filename}.txt"
+        if not id_filepath.exists():
+            print(id_filepath)
+            with open(id_filepath, 'w') as file:
+                file.write(txt_filename)
+    
+        cmd_str = f"/home/axel/tools/SparsePainter/SparsePainter -reffile /home/axel/python-projects/Recombination/output/wgs-mapping.tar.gz.filtered.ref.vcf -targetfile /home/axel/python-projects/Recombination/output/targets/{file.name} -mapfile /home/axel/python-projects/Recombination/output/map.txt -popfile /home/axel/python-projects/Recombination/output/pop.txt -namefile /home/axel/python-projects/Recombination/output/targets/{txt_filename}.txt -out {txt_filename} -prob -haploid -chunklength -probstore raw"
+        print(cmd_str)
+        try:
+            result = subprocess.run(cmd_str, shell=True, check=True, capture_output=True, text=True)
+            print(result.stdout)  # Output of the command
+        except subprocess.CalledProcessError as e:
+            print(f"Error running command: {e}")
+            print(e.stderr)  # Output the error message
 
 if __name__ == "__main__":
     # i = 0
@@ -471,7 +527,9 @@ if __name__ == "__main__":
     #add_missigness(Path('output/data.csv'))
     #keep_top(Path('output/wgs-mapping_with_ref.fasta.vcf'), Path('top_1000_wgs-mapping_with_ref.fasta.vcf'))
     #filter_samples_by_missingness(Path('output/wgs-mapping_with_ref.fasta.vcf'), Path('output/wgs-mapping_with_ref.filtered.fasta.vcf'))
-    build_target_files(Path('output/wgs-mapping.tar.gz.filtered.ref.vcf'))
+    build_target_files(Path('output/wgs-mapping.tar.gz.filtered.ref.vcf'), Path("output/meta_with_cluster.csv"))
+    #build_sparsepainter_strings(Path('/home/axel/python-projects/Recombination/output/targets'))
+    #build_population_file(Path('output/wgs-mapping.tar.gz.filtered.ref.vcf'), Path("output/meta_with_cluster.csv"))
 
     # append_fasta(Path("wgs-mapping/wgs-mapping/mapping-NC_011294.filtered.fa"), 
     #              Path("output/S_enterica_Enteritidis_P12510.fasta"), 

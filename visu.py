@@ -7,6 +7,7 @@ import plotly.express as px
 import ast
 from utils import run_cmd
 import matplotlib.pyplot as plt
+import gzip
 
 
 def convert_to_dict(count_str):
@@ -192,6 +193,92 @@ def plot_histogram(missing_snp_counts):
     plt.ylabel('Frequency')
     plt.show()
 
+def visu_sparsepainter_output(out_dir):
+    print(out_dir)
+    gz_files_chunk = list(out_dir.glob("*chunklength.txt.gz"))
+    if len(gz_files_chunk) == 0:
+        print(f"No files in {out_dir}!")
+        return
+    data = []
+    dfs_chunk = []
+    dfs_prob = []
+    for gzfile in gz_files_chunk:
+        # if 'chunklength' not in str(gzfile):
+        #     continue
+        print(gzfile)
+        with gzip.open(gzfile, 'rt') as file:
+            df = pd.DataFrame()
+            for i, line in enumerate(file):
+                d = line.strip().split()
+                if i == 0:
+                    header = d
+                    continue
+                values = np.array(d[1:])
+                print(values)
+                values = [list(map(float, s.split(','))) for s in values]
+                data.append(np.array(values))
+
+        df = pd.DataFrame(data[0])
+        df = df / df.sum()
+        print(data)
+        print(df)
+        print(gzfile)
+        print(header)
+
+        plt.figure()
+        print("imshow")
+        plt.imshow(df, cmap='viridis', aspect='auto')
+        plt.colorbar(label='Value')
+        plt.title(f'{gzfile.stem} Heatmap')
+        out_file = f'{gzfile.name}_heatmap.png'
+        print(out_file)
+        print("save...")
+        plt.savefig(out_file)
+        print(out_file)
+
+    gz_files_prob = list(out_dir.glob("*prob.txt.gz"))
+    
+    if len(gz_files_prob) == 0:
+        print(f"No files in {out_dir}!")
+        return
+    data = []
+    dfs_chunk = []
+    dfs_prob = []
+    for gzfile in gz_files_prob:
+        print(gzfile)
+        with gzip.open(gzfile, 'rt') as file:
+            df = pd.DataFrame()
+            for i, line in enumerate(file):
+                d = line.strip().split()
+                if i == 0:
+                    header = d
+                    continue
+                values = np.array(d[1:])
+                print(values)
+                values = [list(map(int, s.split(','))) for s in values]
+                data.append(np.array(values))
+
+        df = pd.DataFrame(data[1])
+
+        print(data)
+        print(df)
+        print(gzfile)
+        print(header)
+
+        plt.figure()
+        print("imshow")
+        plt.imshow(df, cmap='viridis', aspect='auto')
+        plt.colorbar(label='Value')
+        plt.title(f'{gzfile.stem} Heatmap')
+        out_file = f'{gzfile.name}_heatmap.png'
+        print(out_file)
+        print("save...")
+        plt.savefig(out_file)
+        print(out_file)
+        
+
+
 if __name__ == "__main__":
-    histogram_fasta(Path('/home/axel/python-projects/Recombination/output/log_4.csv'))
+    visu_sparsepainter_output(Path("/home/axel/tools/SparsePainter"))
+    #histogram_fasta(Path('/home/axel/python-projects/Recombination/output/log_4.csv'))
     #histogram_vcf(Path('output/wgs-mapping_with_ref.fasta.expand.vcf'))

@@ -99,13 +99,17 @@ if __name__ == "__main__":
 
     vcf_filepath = Path('output/wgs-mapping.tar.gz.vcf')
     vcf_filepath_ref = Path('output/wgs-mapping.tar.gz.filtered.ref.vcf')
+    vcf_filepath_target = Path('output/targets/5_SRR8204807.vcf')
+    
     # histogram_vcf(vcf_filepath, title="(Raw)")
     # filtered_vcf_filepath = clean_vcf(vcf_filepath, thresh=10)
     # histogram_vcf(filtered_vcf_filepath, title="(Filtered)")
     # vcf_filepath_ref = build_ref_from_vcf(filtered_vcf_filepath)
 
+    namefile_filepath = vcf_filepath_target.parent / "SRR8204807.txt"
     sites_filepath = vcf_filepath.parent / "sites.txt"
     map_filepath = vcf_filepath.parent / "map.txt"
+    pop_filepath = vcf_filepath.parent / "pop.txt"
     # run_cmd(
     #     f"bcftools query -f '%POS\\n' {vcf_filepath} > {sites_filepath}",
     #     vcf_filepath.parent,
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     data_dir = "/home/axel/python-projects/Recombination/"
 
     run_cmd(
-        f"./SparsePainter -reffile {data_dir}{vcf_filepath_ref.as_posix()} -targetfile {data_dir}{vcf_filepath_ref.as_posix()} -mapfile {data_dir}{map_filepath.as_posix()} -popfile {} -prob -haploid -chunklength -probstore raw",
+        f"/home/axel/tools/SparsePainter/SparsePainter -reffile {data_dir}{vcf_filepath_ref.as_posix()} -targetfile {data_dir}{vcf_filepath_target.as_posix()} -mapfile {data_dir}{map_filepath.as_posix()} -popfile {data_dir}{pop_filepath.as_posix()} -namefile {data_dir}{namefile_filepath.as_posix()} -prob -haploid -chunklength -probstore raw",
         vcf_filepath.parent,
         "cd",
         -1,
