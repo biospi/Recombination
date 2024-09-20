@@ -430,18 +430,17 @@ def build_target_files(vcf_file, cluster_file):
                 sample_columns = {name: [] for name in sample_names}
                 variant_counts = {name: {"total": 0, "variant": 0} for name in sample_names}
             else:
-                pass
-                # Extract the variant information and corresponding sample columns
-                # variant_info = line.strip().split("\t")
-                # for i, sample_name in enumerate(sample_names):
-                #     sample_data = variant_info[9 + i]
-                #     # Add the variant info plus the sample data
-                #     sample_columns[sample_name].append("\t".join(variant_info[:9] + [sample_data]))
+                Extract the variant information and corresponding sample columns
+                variant_info = line.strip().split("\t")
+                for i, sample_name in enumerate(sample_names):
+                    sample_data = variant_info[9 + i]
+                    # Add the variant info plus the sample data
+                    sample_columns[sample_name].append("\t".join(variant_info[:9] + [sample_data]))
                     
-                #     # Calculate variability level
-                #     variant_counts[sample_name]["total"] += 1
-                #     if sample_data.startswith("1") or sample_data.startswith("0/1"):
-                #         variant_counts[sample_name]["variant"] += 1
+                    # Calculate variability level
+                    variant_counts[sample_name]["total"] += 1
+                    if sample_data.startswith("1") or sample_data.startswith("0/1"):
+                        variant_counts[sample_name]["variant"] += 1
 
     # Create individual VCF files for each sample
     for sample_name in sample_names:
