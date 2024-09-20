@@ -430,7 +430,7 @@ def build_target_files(vcf_file, cluster_file):
                 sample_columns = {name: [] for name in sample_names}
                 variant_counts = {name: {"total": 0, "variant": 0} for name in sample_names}
             else:
-                Extract the variant information and corresponding sample columns
+                #Extract the variant information and corresponding sample columns
                 variant_info = line.strip().split("\t")
                 for i, sample_name in enumerate(sample_names):
                     sample_data = variant_info[9 + i]
