@@ -226,11 +226,12 @@ def visu_sparsepainter_output(out_dir):
         print(header)
 
         plt.figure()
-        print("imshow")
+        title = '\n'.join(gzfile.stem.split('-'))
         plt.imshow(df, cmap='viridis', aspect='auto')
         plt.colorbar(label='Value')
-        plt.title(f'{gzfile.stem} Heatmap')
+        plt.title(f'{title} Heatmap')
         out_file = f'{gzfile.name}_heatmap.png'
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
         print(out_file)
         print("save...")
         plt.savefig(out_file)
@@ -266,10 +267,12 @@ def visu_sparsepainter_output(out_dir):
         print(header)
 
         plt.figure()
-        print("imshow")
+        plt.tight_layout()
+        title = '\n'.join(gzfile.stem.split('-'))
         plt.imshow(df, cmap='viridis', aspect='auto')
         plt.colorbar(label='Value')
-        plt.title(f'{gzfile.stem} Heatmap')
+        plt.title(f'{title} Heatmap')
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
         out_file = f'{gzfile.name}_heatmap.png'
         print(out_file)
         print("save...")

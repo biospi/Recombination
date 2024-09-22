@@ -14,6 +14,7 @@ import re
 import numpy as np
 import gzip
 import ast
+import vcfpy
 
 import gzip
 from mimetypes import guess_type
@@ -413,56 +414,85 @@ def build_target_files(vcf_file, cluster_file):
     out_dir.mkdir(parents=True, exist_ok=True)
     total_lines = sum(1 for _ in open(vcf_file))
 
-    with vcf_file.open() as f:
-        header = []
-        sample_names = []
-        sample_columns = {}
-        variant_counts = {}  # To store variability levels
+    # with vcf_file.open() as f:
+    #     header = []
+    #     sample_names = []
+    #     sample_columns = {}
+    #     variant_counts = {}  # To store variability levels
 
-        # Parse the VCF file line by line
-        for line in tqdm(f, total=total_lines):
-            if line.startswith("##"):  # VCF metadata header lines
-                header.append(line)
-            elif line.startswith("#CHROM"):  # The column names (including samples)
-                header.append(line)
-                columns = line.strip().split("\t")
-                sample_names = columns[9:]  # Sample names start at column 9
-                sample_columns = {name: [] for name in sample_names}
-                variant_counts = {name: {"total": 0, "variant": 0} for name in sample_names}
-            else:
-                #Extract the variant information and corresponding sample columns
-                variant_info = line.strip().split("\t")
-                for i, sample_name in enumerate(sample_names):
-                    sample_data = variant_info[9 + i]
-                    # Add the variant info plus the sample data
-                    sample_columns[sample_name].append("\t".join(variant_info[:9] + [sample_data]))
+    #     # Parse the VCF file line by line
+    #     for line in tqdm(f, total=total_lines):
+    #         if line.startswith("##"):  # VCF metadata header lines
+    #             header.append(line)
+    #         elif line.startswith("#CHROM"):  # The column names (including samples)
+    #             header.append(line)
+    #             columns = line.strip().split("\t")
+    #             sample_names = columns[9:]  # Sample names start at column 9
+    #             sample_columns = {name: [] for name in sample_names}
+    #             variant_counts = {name: {"total": 0, "variant": 0} for name in sample_names}
+    #         else:
+    #             #Extract the variant information and corresponding sample columns
+    #             variant_info = line.strip().split("\t")
+    #             for i, sample_name in enumerate(sample_names):
+    #                 sample_data = variant_info[9 + i]
+    #                 # Add the variant info plus the sample data
+    #                 sample_columns[sample_name].append("\t".join(variant_info[:9] + [sample_data]))
                     
-                    # Calculate variability level
-                    variant_counts[sample_name]["total"] += 1
-                    if sample_data.startswith("1") or sample_data.startswith("0/1"):
-                        variant_counts[sample_name]["variant"] += 1
+    #                 # Calculate variability level
+    #                 variant_counts[sample_name]["total"] += 1
+    #                 if sample_data.startswith("1") or sample_data.startswith("0/1"):
+    #                     variant_counts[sample_name]["variant"] += 1
 
-    # Create individual VCF files for each sample
-    for sample_name in sample_names:
-        df_meta = df_clusters[df_clusters["SRA Accession"] == sample_name][['SNP', 'Cluster', 'Country']]
-        meta_str = [str(x).replace('.','_') for x in df_meta.values[0].tolist()]
-        meta_str = ' '.join(meta_str)
-        total_variants = variant_counts[sample_name]["total"]
-        non_ref_variants = variant_counts[sample_name]["variant"]
-        # Calculate variability level as a percentage
-        variability_level = int((non_ref_variants / total_variants) * 100) if total_variants > 0 else 0
+    # # Create individual VCF files for each sample
+    # for sample_name in sample_names:
+    #     df_meta = df_clusters[df_clusters["SRA Accession"] == sample_name][['SNP', 'Cluster', 'Country']]
+    #     meta_str = [str(x).replace('.','_') for x in df_meta.values[0].tolist()]
+    #     meta_str = ' '.join(meta_str)
+    #     total_variants = variant_counts[sample_name]["total"]
+    #     non_ref_variants = variant_counts[sample_name]["variant"]
+    #     # Calculate variability level as a percentage
+    #     variability_level = int((non_ref_variants / total_variants) * 100) if total_variants > 0 else 0
         
-        # Prepend variability level to the filename
-        target_file = out_dir / f"{variability_level}_{sample_name}_{meta_str}.vcf"
-        with open(out_dir / f"{sample_name}.txt", "w") as file:
-            file.write(sample_name)
-        print(target_file)
-        with target_file.open("w") as f:
-            # Write the header and then the variant information for the sample
-            f.writelines(header)
-            f.write("\n".join(sample_columns[sample_name]) + "\n")
+    #     # Prepend variability level to the filename
+    #     target_file = out_dir / f"{variability_level}_{sample_name}_{meta_str}.vcf"
+    #     with open(out_dir / f"{sample_name}.txt", "w") as file:
+    #         file.write(sample_name)
+    #     print(target_file)
+    #     with target_file.open("w") as f:
+    #         # Write the header and then the variant information for the sample
+    #         f.writelines(header)
+    #         f.write("\n".join(sample_columns[sample_name]) + "\n")
 
-    print(f"Target files created in {out_dir}")
+    # print(f"Target files created in {out_dir}")
+
+    for iso in ['SRR1957880', 'SRR7873970','SRR8204807', 'SRR1957969', 'SRR5194027', 'SRR1957886']:
+        print(iso)
+        # Open the input VCF file for reading
+        reader = vcfpy.Reader.from_path(vcf_file)
+
+        # Filter the samples
+        samples_to_keep = [iso]
+
+        # Create a new header with only the selected samples
+        new_header = reader.header.copy()
+        nh = [s for s in reader.header.samples.names if s in samples_to_keep]
+        new_header.samples = vcfpy.SamplesInfos(nh)
+
+        df_meta = df_clusters[df_clusters["SRA Accession"] == samples_to_keep[0]][['SNP', 'Cluster', 'Country']]
+        meta_str = [str(x).replace('.','_') for x in df_meta.values[0].tolist()]
+        meta_str = '-'.join(meta_str)
+
+        # Open the output VCF file for writing
+        with vcfpy.Writer.from_path(f'{samples_to_keep[0]}-{meta_str}.vcf', new_header) as writer:
+            # Iterate over records and write only selected samples
+            for record in reader:
+                # Filter genotypes to keep only the selected samples
+                new_call_data = [record.call_for_sample[s] for s in samples_to_keep]
+                new_record = record
+                new_record.calls = new_call_data
+
+                # Write the new record to the output file
+                writer.write_record(new_record)
 
 
 def get_sample_names(vcf_file):
@@ -494,15 +524,18 @@ def build_population_file(ref_file, cluster_file):
 
 def build_sparsepainter_strings(targets_dir):
     vcf_files = list(targets_dir.glob("*.vcf"))
+    print(vcf_files)
+    print('\n')
     for file in vcf_files:
-        txt_filename = file.stem.split('_')[1]
-        id_filepath = targets_dir / f"{txt_filename}.txt"
+        txt_filename = file.name
+        isolate_name = file.stem.split('_')[1]
+        id_filepath = targets_dir / file.name
         if not id_filepath.exists():
             print(id_filepath)
             with open(id_filepath, 'w') as file:
                 file.write(txt_filename)
     
-        cmd_str = f"/home/axel/tools/SparsePainter/SparsePainter -reffile /home/axel/python-projects/Recombination/output/wgs-mapping.tar.gz.filtered.ref.vcf -targetfile /home/axel/python-projects/Recombination/output/targets/{file.name} -mapfile /home/axel/python-projects/Recombination/output/map.txt -popfile /home/axel/python-projects/Recombination/output/pop.txt -namefile /home/axel/python-projects/Recombination/output/targets/{txt_filename}.txt -out {txt_filename} -prob -haploid -chunklength -probstore raw"
+        cmd_str = f"/home/axel/tools/SparsePainter/SparsePainter -reffile /home/axel/python-projects/Recombination/output/wgs-mapping.tar.gz.filtered.ref.vcf -targetfile /home/axel/python-projects/Recombination/output/targets/{file.name} -mapfile /home/axel/python-projects/Recombination/output/map.txt -popfile /home/axel/python-projects/Recombination/output/pop.txt -namefile /home/axel/python-projects/Recombination/output/targets/{isolate_name}.txt -out {txt_filename} -prob -haploid -chunklength -probstore raw"
         print(cmd_str)
         try:
             result = subprocess.run(cmd_str, shell=True, check=True, capture_output=True, text=True)
